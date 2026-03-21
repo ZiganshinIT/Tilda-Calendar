@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест виджета бронирования</title>
+    <style>
+        /* Стили для тестовой страницы */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Стили виджета */
+        .booking-widget {
+            max-width: 600px;
+            margin: 0 auto;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .booking-widget h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        /* Список услуг */
+        .services-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .service-card {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            background: white;
+        }
+
+        .service-card:hover {
+            border-color: #4CAF50;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+        }
+
+        .service-card.selected {
+            border-color: #4CAF50;
+            background: #f0f9f0;
+        }
+
+        .service-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .service-duration {
+            color: #666;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .service-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #4CAF50;
+        }
+
+        /* Календарь */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .nav-btn {
+            padding: 8px 20px;
+            border: none;
+            background: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #45a049;
+        }
+
+        #current-month {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: 600;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            color: #666;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .calendar-day.available {
+            background: #e8f5e8;
+            border-color: #4CAF50;
+            color: #2e7d32;
+            font-weight: 500;
+        }
+
+        .calendar-day.available:hover {
+            background: #4CAF50;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .calendar-day.unavailable {
+            background: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        .calendar-day.empty {
+            border: none;
+            cursor: default;
+        }
+
+        /* Временные слоты */
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .time-slot {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .time-slot:hover {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+            transform: translateY(-2px);
+        }
+
+        /* Форма */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #45a049;
+        }
+
+        /* Кнопки "Назад" */
+        .back-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: none;
+            border: 1px solid #4CAF50;
+            color: #4CAF50;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #f0f9f0;
+        }
+
+        /* Сообщение об успехе */
+        .success-message {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-message h2 {
+            color: #4CAF50;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .success-message p {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .new-booking-btn {
+            padding: 12px 30px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .new-booking-btn:hover {
+            background: #45a049;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #f44336;
+        }
+
+        @media (max-width: 600px) {
+            .services-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar-grid {
+                gap: 2px;
+            }
+            
+            .calendar-day {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Тест виджета бронирования</h1>
+        <p>Этот файл имитирует страницу на Tilda</p>
+        
+        <!-- Виджет бронирования -->
+        <div class="booking-widget" id="booking-widget">
+            <!-- Шаг 1: Выбор услуги -->
+            <div class="booking-step" id="step1">
+                <h2>Выберите услугу</h2>
+                <div class="services-list" id="services-list">
+                    <div class="loading">Загрузка услуг...</div>
+                </div>
+            </div>
+
+            <!-- Шаг 2: Выбор даты -->
+            <div class="booking-step" id="step2" style="display: none;">
+                <h2>Выберите дату</h2>
+                
+                <div class="calendar-header">
+                    <button class="nav-btn" onclick="changeMonth(-1)">←</button>
+                    <span id="current-month"></span>
+                    <button class="nav-btn" onclick="changeMonth(1)">→</button>
+                </div>
+                
+                <div class="calendar-grid" id="calendar"></div>
+                
+                <button class="back-btn" onclick="goToStep(1)">← Назад к услугам</button>
+            </div>
+
+            <!-- Шаг 3: Выбор времени -->
+            <div class="booking-step" id="step3" style="display: none;">
+                <h2>Выберите время</h2>
+                <div class="time-slots" id="time-slots"></div>
+                <button class="back-btn" onclick="goToStep(2)">← Назад к дате</button>
+            </div>
+
+            <!-- Шаг 4: Форма ввода данных -->
+            <div class="booking-step" id="step4" style="display: none;">
+                <h2>Ваши данные</h2>
+                <form id="booking-form" onsubmit="submitBooking(event)">
+                    <div class="form-group">
+                        <label for="client_name">Имя *</label>
+                        <input type="text" id="client_name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="client_phone">Телефон *</label>
+                        <input type="tel" id="client_phone" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="client_email">Email</label>
+                        <input type="email" id="client_email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="comment">Комментарий</label>
+                        <textarea id="comment" rows="3"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Записаться</button>
+                </form>
+                <button class="back-btn" onclick="goToStep(3)">← Назад к времени</button>
+            </div>
+
+            <!-- Шаг 5: Подтверждение -->
+            <div class="booking-step" id="step5" style="display: none;">
+                <div class="success-message">
+                    <h2>✓ Спасибо за запись!</h2>
+                    <p>Мы свяжемся с вами для подтверждения.</p>
+                    <button class="new-booking-btn" onclick="resetWidget()">Новая запись</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Конфигурация
+        const API_URL = 'http://127.0.0.1:8000/api';
+        
+        // Состояние приложения
+        let state = {
+            step: 1,
+            selectedService: null,
+            selectedDate: null,
+            selectedTime: null,
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear()
+        };
+
+        // Названия месяцев на русском
+        const monthNames = [
+            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ];
+
+        // Названия дней недели
+        const weekdayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+        // Запуск при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            loadServices();
+        });
+
+        // Загрузка услуг с сервера
+        async function loadServices() {
+            try {
+                const response = await fetch(`${API_URL}/services/`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const services = await response.json();
+                
+                if (services.length === 0) {
+                    document.getElementById('services-list').innerHTML = 
+                        '<div class="error">Нет доступных услуг</div>';
+                    return;
+                }
+                
+                displayServices(services);
+            } catch (error) {
+                console.error('Ошибка загрузки услуг:', error);
+                document.getElementById('services-list').innerHTML = 
+                    '<div class="error">Ошибка загрузки услуг. Проверьте подключение к серверу.</div>';
+            }
+        }
+
+        // Отображение услуг
+        function displayServices(services) {
+            const servicesList = document.getElementById('services-list');
+            servicesList.innerHTML = services.map(service => `
+                <div class="service-card" onclick="selectService(${service.id}, this)">
+                    <div class="service-name">${service.name}</div>
+                    <div class="service-duration">⏱ ${service.duration} мин</div>
+                    <div class="service-price">💰 ${service.price} ₽</div>
+                </div>
+            `).join('');
+        }
+
+        // Выбор услуги
+        function selectService(serviceId, element) {
+            state.selectedService = serviceId;
+            state.step = 2;
+            
+            // Подсвечиваем выбранную услугу
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            
+            // Переходим к выбору даты
+            goToStep(2);
+            loadCalendar();
+        }
+
+        // Загрузка календаря
+        async function loadCalendar() {
+            try {
+                const response = await fetch(
+                    `${API_URL}/bookings/available_dates/?` +
+                    `year=${state.currentYear}&month=${state.currentMonth + 1}`
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const availableDates = await response.json();
+                
+                // Обновляем заголовок месяца
+                document.getElementById('current-month').textContent = 
+                    `${monthNames[state.currentMonth]} ${state.currentYear}`;
+                
+                // Строим календарь
+                buildCalendar(availableDates);
+                
+            } catch (error) {
+                console.error('Ошибка загрузки календаря:', error);
+                document.getElementById('calendar').innerHTML = 
+                    '<div class="error">Ошибка загрузки календаря</div>';
+            }
+        }
+
+        // Построение календаря
+        function buildCalendar(availableDates) {
+            const firstDay = new Date(state.currentYear, state.currentMonth, 1).getDay();
+            const daysInMonth = new Date(state.currentYear, state.currentMonth + 1, 0).getDate();
+            
+            // Корректировка первого дня (0 - воскресенье, делаем понедельник первым)
+            let firstDayIndex = firstDay === 0 ? 6 : firstDay - 1;
+            
+            // Создаем календарь
+            let calendarHtml = '';
+            
+            // Добавляем названия дней недели
+            weekdayNames.forEach(day => {
+                calendarHtml += `<div class="weekday">${day}</div>`;
+            });
+            
+            // Пустые ячейки до первого дня месяца
+            for (let i = 0; i < firstDayIndex; i++) {
+                calendarHtml += '<div class="calendar-day empty"></div>';
+            }
+            
+            // Заполняем дни месяца
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isAvailable = availableDates.includes(dateStr);
+                
+                calendarHtml += `
+                    <div class="calendar-day ${isAvailable ? 'available' : 'unavailable'}" 
+                         ${isAvailable ? `onclick="selectDate('${dateStr}')"` : ''}>
+                        ${day}
+                    </div>
+                `;
+            }
+            
+            document.getElementById('calendar').innerHTML = calendarHtml;
+        }
+
+        // Смена месяца
+        function changeMonth(delta) {
+            state.currentMonth += delta;
+            
+            if (state.currentMonth < 0) {
+                state.currentMonth = 11;
+                state.currentYear--;
+            } else if (state.currentMonth > 11) {
+                state.currentMonth = 0;
+                state.currentYear++;
+            }
+            
+            loadCalendar();
+        }
+
+        // Выбор даты
+        async function selectDate(dateStr) {
+            state.selectedDate = dateStr;
+            state.step = 3;
+            
+            goToStep(3);
+            
+            try {
+                const response = await fetch(
+                    `${API_URL}/bookings/available_times/?` +
+                    `date=${dateStr}&service_id=${state.selectedService}`
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const times = await response.json();
+                
+                const timeSlots = document.getElementById('time-slots');
+                
+                if (times.length === 0) {
+                    timeSlots.innerHTML = '<div class="error">Нет свободного времени в этот день</div>';
+                } else {
+                    timeSlots.innerHTML = times.map(time => `
+                        <div class="time-slot" onclick="selectTime('${time}', this)">
+                            ${time}
+                        </div>
+                    `).join('');
+                }
+                
+            } catch (error) {
+                console.error('Ошибка загрузки времени:', error);
+                document.getElementById('time-slots').innerHTML = 
+                    '<div class="error">Ошибка загрузки времени</div>';
+            }
+        }
+
+        // Выбор времени
+        function selectTime(time, element) {
+            state.selectedTime = time;
+            state.step = 4;
+            
+            // Подсвечиваем выбранное время
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.style.background = '';
+                slot.style.color = '';
+            });
+            element.style.background = '#4CAF50';
+            element.style.color = 'white';
+            
+            goToStep(4);
+        }
+
+        // Отправка формы
+        async function submitBooking(event) {
+            event.preventDefault();
+            
+            const formData = {
+                service: state.selectedService,
+                date: state.selectedDate,
+                time: state.selectedTime,
+                client_name: document.getElementById('client_name').value,
+                client_phone: document.getElementById('client_phone').value,
+                client_email: document.getElementById('client_email').value,
+                comment: document.getElementById('comment').value
+            };
+            
+            // Простая валидация
+            if (!formData.client_name.trim()) {
+                alert('Введите имя');
+                return;
+            }
+            
+            if (!formData.client_phone.trim()) {
+                alert('Введите телефон');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/bookings/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    state.step = 5;
+                    goToStep(5);
+                } else {
+                    const error = await response.json();
+                    
+                    if (error.non_field_errors) {
+                        alert('Ошибка: ' + error.non_field_errors[0]);
+                    } else {
+                        alert('Ошибка при создании записи');
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка отправки:', error);
+                alert('Произошла ошибка при отправке. Проверьте подключение к серверу.');
+            }
+        }
+
+        // Навигация между шагами
+        function goToStep(step) {
+            // Скрываем все шаги
+            document.querySelectorAll('.booking-step').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Показываем нужный шаг
+            document.getElementById(`step${step}`).style.display = 'block';
+        }
+
+        // Сброс виджета (новая запись)
+        function resetWidget() {
+            state = {
+                step: 1,
+                selectedService: null,
+                selectedDate: null,
+                selectedTime: null,
+                currentMonth: new Date().getMonth(),
+                currentYear: new Date().getFullYear()
+            };
+            
+            // Очищаем форму
+            document.getElementById('booking-form').reset();
+            
+            // Переходим на первый шаг
+            goToStep(1);
+            
+            // Перезагружаем услуги
+            loadServices();
+        }
+    </script>
+</body>
+</html>
