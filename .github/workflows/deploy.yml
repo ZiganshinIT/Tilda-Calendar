@@ -23,11 +23,31 @@ jobs:
           port: 22
           script_stop: true
           script: |
+            # Добавляем исключение для Git
+            sudo -u django git config --global --add safe.directory /home/django/Tilda-Calendar
+            
             cd /home/django/Tilda-Calendar
+            
+            # Сбрасываем локальные изменения
+            git reset --hard HEAD
+            git clean -fd
+            
+            # Стягиваем изменения
             git pull origin release
+            
+            # Активируем окружение
             source venv/bin/activate
+            
+            # Обновляем зависимости
             pip install -r requirements.txt
+            
+            # Применяем миграции
             python manage.py migrate
+            
+            # Собираем статику
             python manage.py collectstatic --noinput
+            
+            # Перезапускаем Gunicorn
             sudo systemctl restart gunicorn
+            
             echo "✅ Деплой завершен!"
