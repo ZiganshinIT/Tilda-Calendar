@@ -28,14 +28,13 @@ jobs:
             
             cd /home/django/Tilda-Calendar
             
-            # Сбрасываем локальные изменения
-            su - django -c "cd /home/django/Tilda-Calendar && git reset --hard HEAD && git clean -fd"
-            
             # Стягиваем изменения
             su - django -c "cd /home/django/Tilda-Calendar && git pull origin release"
             
-            # Активируем окружение и выполняем команды
-            su - django -c "cd /home/django/Tilda-Calendar && source venv/bin/activate && pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput"
+            # Выполняем команды с полным путем к venv
+            su - django -c "cd /home/django/Tilda-Calendar && /home/django/Tilda-Calendar/venv/bin/pip install -r requirements.txt"
+            su - django -c "cd /home/django/Tilda-Calendar && /home/django/Tilda-Calendar/venv/bin/python manage.py migrate"
+            su - django -c "cd /home/django/Tilda-Calendar && /home/django/Tilda-Calendar/venv/bin/python manage.py collectstatic --noinput"
             
             # Перезапускаем Gunicorn
             systemctl restart gunicorn
