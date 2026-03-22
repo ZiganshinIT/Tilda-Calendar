@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Календарь бронирования</title>
     <style>
         * {
@@ -12,7 +12,7 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
@@ -32,6 +32,7 @@
         .header h1 {
             font-size: 36px;
             margin-bottom: 10px;
+            font-weight: 600;
         }
         
         .header p {
@@ -52,6 +53,18 @@
         
         .booking-step.active {
             display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         h2 {
@@ -59,8 +72,10 @@
             color: #333;
             margin-bottom: 25px;
             font-size: 24px;
+            font-weight: 600;
         }
         
+        /* Услуги */
         .services-list {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -75,6 +90,8 @@
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
+            background: white;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .service-card:hover {
@@ -83,20 +100,26 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
         
+        .service-card:active {
+            transform: scale(0.98);
+        }
+        
         .service-card.selected {
             border-color: #667eea;
-            background: #f0f0ff;
+            background: linear-gradient(135deg, #f0f0ff 0%, #e8e8ff 100%);
         }
         
         .service-name {
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 10px;
+            color: #333;
         }
         
         .service-duration {
             color: #666;
             font-size: 14px;
+            margin-bottom: 5px;
         }
         
         .service-price {
@@ -106,6 +129,7 @@
             margin-top: 10px;
         }
         
+        /* Календарь */
         .calendar-header {
             display: flex;
             justify-content: space-between;
@@ -124,15 +148,23 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            transition: all 0.3s;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .nav-btn:hover {
             background: #5a67d8;
+            transform: scale(1.02);
+        }
+        
+        .nav-btn:active {
+            transform: scale(0.98);
         }
         
         #currentMonth {
             font-size: 18px;
             font-weight: 600;
+            color: #333;
         }
         
         .calendar-grid {
@@ -148,6 +180,8 @@
             padding: 10px;
             background: #f8f9fa;
             border-radius: 8px;
+            color: #666;
+            font-size: 14px;
         }
         
         .calendar-day {
@@ -159,6 +193,10 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
+            background: white;
+            font-size: 14px;
+            font-weight: 500;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .calendar-day.available {
@@ -173,6 +211,10 @@
             transform: scale(1.05);
         }
         
+        .calendar-day.available:active {
+            transform: scale(0.98);
+        }
+        
         .calendar-day.unavailable {
             background: #f5f5f5;
             color: #999;
@@ -180,6 +222,13 @@
             text-decoration: line-through;
         }
         
+        .calendar-day.empty {
+            border: none;
+            cursor: default;
+            background: transparent;
+        }
+        
+        /* Временные слоты */
         .time-slots {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -194,14 +243,23 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
+            background: white;
+            font-weight: 500;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .time-slot:hover {
             background: #667eea;
             color: white;
             border-color: #667eea;
+            transform: translateY(-2px);
         }
         
+        .time-slot:active {
+            transform: scale(0.98);
+        }
+        
+        /* Форма */
         .form-group {
             margin-bottom: 20px;
         }
@@ -210,6 +268,7 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
+            color: #333;
         }
         
         .form-group input,
@@ -219,22 +278,38 @@
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             font-size: 16px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
         .submit-btn {
             width: 100%;
             padding: 15px;
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 8px;
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .submit-btn:hover {
-            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
         }
         
         .back-btn {
@@ -246,8 +321,20 @@
             color: #667eea;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            -webkit-tap-highlight-color: transparent;
         }
         
+        .back-btn:hover {
+            background: #f0f0ff;
+        }
+        
+        .back-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* Успех */
         .success-message {
             text-align: center;
             padding: 40px;
@@ -258,33 +345,218 @@
             margin-bottom: 15px;
         }
         
+        .success-message p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
         .new-booking-btn {
             padding: 12px 30px;
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            margin-top: 20px;
+            font-size: 16px;
+            transition: all 0.3s;
+            -webkit-tap-highlight-color: transparent;
         }
         
-        .loading, .error {
+        .new-booking-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .loading {
             text-align: center;
             padding: 40px;
             color: #666;
+            font-style: italic;
         }
         
         .error {
+            text-align: center;
+            padding: 40px;
             color: #f44336;
         }
         
+        /* ========== АДАПТИВНОСТЬ ДЛЯ ТЕЛЕФОНОВ ========== */
         @media (max-width: 600px) {
-            .container {
+            body {
                 padding: 10px;
             }
+            
+            .container {
+                padding: 0;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .header p {
+                font-size: 14px;
+            }
+            
             .booking-widget {
+                padding: 15px;
+                border-radius: 15px;
+            }
+            
+            h2 {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+            
+            /* Услуги */
+            .services-list {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .service-card {
+                padding: 12px;
+            }
+            
+            .service-name {
+                font-size: 16px;
+            }
+            
+            .service-duration {
+                font-size: 12px;
+            }
+            
+            .service-price {
+                font-size: 18px;
+            }
+            
+            /* Календарь */
+            .calendar-header {
+                padding: 10px;
+                margin: 10px 0;
+            }
+            
+            .nav-btn {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+            
+            #currentMonth {
+                font-size: 14px;
+            }
+            
+            .calendar-grid {
+                gap: 2px;
+            }
+            
+            .weekday {
+                padding: 8px 0;
+                font-size: 11px;
+            }
+            
+            .calendar-day {
+                font-size: 12px;
+                min-height: 35px;
+            }
+            
+            /* Временные слоты */
+            .time-slots {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+                gap: 8px;
+            }
+            
+            .time-slot {
+                padding: 8px;
+                font-size: 12px;
+                min-height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* Форма */
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .form-group label {
+                font-size: 14px;
+            }
+            
+            .form-group input,
+            .form-group textarea {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            .submit-btn {
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            .back-btn {
+                padding: 8px;
+                font-size: 12px;
+            }
+            
+            .success-message {
                 padding: 20px;
             }
+            
+            .success-message h2 {
+                font-size: 20px;
+            }
+            
+            .success-message p {
+                font-size: 14px;
+            }
+            
+            .new-booking-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+        
+        /* Для очень маленьких экранов */
+        @media (max-width: 380px) {
+            .calendar-day {
+                font-size: 10px;
+                min-height: 30px;
+            }
+            
+            .weekday {
+                font-size: 9px;
+                padding: 6px 0;
+            }
+            
+            .time-slot {
+                padding: 6px;
+                font-size: 10px;
+                min-height: 35px;
+            }
+            
+            .service-card {
+                padding: 10px;
+            }
+            
+            .service-name {
+                font-size: 14px;
+            }
+            
+            .service-price {
+                font-size: 16px;
+            }
+        }
+        
+        /* Улучшенные области нажатия для мобильных */
+        .service-card,
+        .calendar-day,
+        .time-slot,
+        .nav-btn,
+        .back-btn,
+        .submit-btn,
+        .new-booking-btn {
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
@@ -297,7 +569,7 @@
         
         <div class="booking-widget" id="bookingWidget">
             <!-- Шаг 1: Выбор услуги -->
-            <div class="booking-step" id="step1">
+            <div class="booking-step active" id="step1">
                 <h2>Выберите услугу</h2>
                 <div class="services-list" id="servicesList">
                     <div class="loading">Загрузка услуг...</div>
@@ -323,32 +595,32 @@
                 <button class="back-btn" onclick="goToStep(2)">← Назад к дате</button>
             </div>
 
-            <!-- Шаг 4: Форма -->
+            <!-- Шаг 4: Форма ввода данных -->
             <div class="booking-step" id="step4">
                 <h2>Ваши данные</h2>
                 <form id="bookingForm">
                     <div class="form-group">
                         <label>Имя *</label>
-                        <input type="text" id="clientName" required>
+                        <input type="text" id="clientName" placeholder="Введите ваше имя" required>
                     </div>
                     <div class="form-group">
                         <label>Телефон *</label>
-                        <input type="tel" id="clientPhone" required>
+                        <input type="tel" id="clientPhone" placeholder="+7 (XXX) XXX-XX-XX" required>
                     </div>
                     <div class="form-group">
                         <label>Email</label>
-                        <input type="email" id="clientEmail">
+                        <input type="email" id="clientEmail" placeholder="example@mail.com">
                     </div>
                     <div class="form-group">
                         <label>Комментарий</label>
-                        <textarea id="comment" rows="3"></textarea>
+                        <textarea id="comment" rows="3" placeholder="Дополнительная информация"></textarea>
                     </div>
                     <button type="submit" class="submit-btn">Записаться</button>
                 </form>
                 <button class="back-btn" onclick="goToStep(3)">← Назад</button>
             </div>
 
-            <!-- Шаг 5: Успех -->
+            <!-- Шаг 5: Подтверждение -->
             <div class="booking-step" id="step5">
                 <div class="success-message">
                     <h2>✓ Спасибо за запись!</h2>
@@ -382,18 +654,23 @@
         async function loadServices() {
             try {
                 const response = await fetch(`${API_URL}/services/`);
+                if (!response.ok) throw new Error('HTTP error');
                 const services = await response.json();
                 displayServices(services);
             } catch (error) {
-                document.getElementById('servicesList').innerHTML = '<div class="error">Ошибка загрузки услуг</div>';
+                document.getElementById('servicesList').innerHTML = '<div class="error">❌ Ошибка загрузки услуг</div>';
             }
         }
         
         function displayServices(services) {
             const container = document.getElementById('servicesList');
+            if (services.length === 0) {
+                container.innerHTML = '<div class="error">Нет доступных услуг</div>';
+                return;
+            }
             container.innerHTML = services.map(service => `
                 <div class="service-card" onclick="selectService(${service.id}, this)">
-                    <div class="service-name">${service.name}</div>
+                    <div class="service-name">${escapeHtml(service.name)}</div>
                     <div class="service-duration">⏱ ${service.duration} мин</div>
                     <div class="service-price">💰 ${service.price} ₽</div>
                 </div>
@@ -411,11 +688,12 @@
         async function loadCalendar() {
             try {
                 const response = await fetch(`${API_URL}/bookings/available_dates/?year=${state.currentYear}&month=${state.currentMonth + 1}`);
+                if (!response.ok) throw new Error('HTTP error');
                 const availableDates = await response.json();
                 document.getElementById('currentMonth').textContent = `${monthNames[state.currentMonth]} ${state.currentYear}`;
                 buildCalendar(availableDates);
             } catch (error) {
-                document.getElementById('calendar').innerHTML = '<div class="error">Ошибка загрузки календаря</div>';
+                document.getElementById('calendar').innerHTML = '<div class="error">❌ Ошибка загрузки календаря</div>';
             }
         }
         
@@ -425,20 +703,31 @@
             let firstDayIndex = firstDay === 0 ? 6 : firstDay - 1;
             
             let html = weekdayNames.map(day => `<div class="weekday">${day}</div>`).join('');
-            for (let i = 0; i < firstDayIndex; i++) html += '<div class="calendar-day empty"></div>';
+            
+            for (let i = 0; i < firstDayIndex; i++) {
+                html += '<div class="calendar-day empty"></div>';
+            }
             
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const isAvailable = availableDates.includes(dateStr);
-                html += `<div class="calendar-day ${isAvailable ? 'available' : 'unavailable'}" ${isAvailable ? `onclick="selectDate('${dateStr}')"` : ''}>${day}</div>`;
+                html += `<div class="calendar-day ${isAvailable ? 'available' : 'unavailable'}" 
+                              ${isAvailable ? `onclick="selectDate('${dateStr}')"` : ''}>
+                            ${day}
+                        </div>`;
             }
             document.getElementById('calendar').innerHTML = html;
         }
         
         function changeMonth(delta) {
             state.currentMonth += delta;
-            if (state.currentMonth < 0) { state.currentMonth = 11; state.currentYear--; }
-            if (state.currentMonth > 11) { state.currentMonth = 0; state.currentYear++; }
+            if (state.currentMonth < 0) {
+                state.currentMonth = 11;
+                state.currentYear--;
+            } else if (state.currentMonth > 11) {
+                state.currentMonth = 0;
+                state.currentYear++;
+            }
             loadCalendar();
         }
         
@@ -447,15 +736,16 @@
             goToStep(3);
             try {
                 const response = await fetch(`${API_URL}/bookings/available_times/?date=${dateStr}&service_id=${state.selectedService}`);
+                if (!response.ok) throw new Error('HTTP error');
                 const times = await response.json();
                 const container = document.getElementById('timeSlots');
                 if (times.length === 0) {
-                    container.innerHTML = '<div class="error">Нет свободного времени</div>';
+                    container.innerHTML = '<div class="error">Нет свободного времени в этот день</div>';
                 } else {
                     container.innerHTML = times.map(time => `<div class="time-slot" onclick="selectTime('${time}', this)">${time}</div>`).join('');
                 }
             } catch (error) {
-                document.getElementById('timeSlots').innerHTML = '<div class="error">Ошибка загрузки времени</div>';
+                document.getElementById('timeSlots').innerHTML = '<div class="error">❌ Ошибка загрузки времени</div>';
             }
         }
         
@@ -469,12 +759,25 @@
         
         document.getElementById('bookingForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            const name = document.getElementById('clientName').value.trim();
+            const phone = document.getElementById('clientPhone').value.trim();
+            
+            if (!name) {
+                alert('Введите имя');
+                return;
+            }
+            if (!phone) {
+                alert('Введите телефон');
+                return;
+            }
+            
             const formData = {
                 service: state.selectedService,
                 date: state.selectedDate,
                 time: state.selectedTime,
-                client_name: document.getElementById('clientName').value,
-                client_phone: document.getElementById('clientPhone').value,
+                client_name: name,
+                client_phone: phone,
                 client_email: document.getElementById('clientEmail').value,
                 comment: document.getElementById('comment').value
             };
@@ -488,10 +791,11 @@
                 if (response.ok) {
                     goToStep(5);
                 } else {
-                    alert('Ошибка при создании записи');
+                    const error = await response.json();
+                    alert(error.non_field_errors ? error.non_field_errors[0] : 'Ошибка при создании записи');
                 }
             } catch (error) {
-                alert('Ошибка отправки');
+                alert('Ошибка отправки. Проверьте подключение к интернету');
             }
         });
         
@@ -512,11 +816,20 @@
                 currentYear: new Date().getFullYear()
             };
             document.getElementById('bookingForm').reset();
+            document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
             goToStep(1);
             loadServices();
         }
         
-        goToStep(1);
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
     </script>
 </body>
 </html>
