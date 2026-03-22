@@ -10,6 +10,6 @@ router.register(r'bookings', views.BookingViewSet)
 
 # Набор URL-адресов
 urlpatterns = [
-    path('', views.home, name='home'),  # Добавь эту строку
+    path('test/', views.home, name='home'),  # Добавь эту строку
     path('api/', include(router.urls)),
 ]
