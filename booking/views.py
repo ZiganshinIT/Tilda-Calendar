@@ -1,4 +1,5 @@
 # booking/views.py
+from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,6 +8,9 @@ from datetime import datetime, timedelta, date
 from .models import Service, Booking, WorkSchedule, DayOff
 from .serializers import ServiceSerializer, BookingSerializer
 import calendar
+
+def home(request):
+    return render(request, 'booking/home.html')
 
 class ServiceViewSet(viewsets.ReadOnlyModelViewSet):
     """Просмотр услуг (только чтение)"""
