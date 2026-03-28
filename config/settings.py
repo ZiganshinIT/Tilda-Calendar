@@ -63,7 +63,10 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / 'templates',  # папка на уровне проекта
+            BASE_DIR / 'booking' / 'templates',  # папка на уровне приложения
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

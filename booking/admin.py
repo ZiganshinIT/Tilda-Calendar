@@ -5,7 +5,7 @@ from django.urls import path
 from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
-from .models import Service, Booking, WorkSchedule, DayOff
+from .models import Service, Booking, DayOff
 
 # Скрываем ненужные модели
 admin.site.unregister(User)
@@ -124,21 +124,6 @@ class BookingAdmin(admin.ModelAdmin):
         return "—"
     action_buttons.short_description = 'Действия'
 
-@admin.register(WorkSchedule)
-class WorkScheduleAdmin(admin.ModelAdmin):
-    list_display = ['day_display', 'is_working', 'start_time', 'end_time']
-    list_editable = ['is_working', 'start_time', 'end_time']  # можно редактировать прямо в списке
-    list_filter = ['is_working']
-
-    def get_queryset(self, request):
-        """Сортируем по дням недели от понедельника к воскресенью"""
-        return super().get_queryset(request).order_by('day')
-    
-    def day_display(self, obj):
-        days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
-        return days[obj.day]
-    day_display.short_description = 'День недели'
-
 @admin.register(DayOff)
 class DayOffAdmin(admin.ModelAdmin):
     list_display = ['display_info', 'type_badge', 'reason_badge', 'recurring_badge']
@@ -207,3 +192,20 @@ class DayOffAdmin(admin.ModelAdmin):
             return mark_safe('<span style="color: #FF9800;">🔄 Каждый год</span>')
         return "—"
     recurring_badge.short_description = 'Повторение'
+
+class CustomAdminSite(admin.AdminSite):
+    def get_app_list(self, request):
+        app_list = super().get_app_list(request)
+        
+        # Добавляем кастомную ссылку в меню
+        custom_link = {
+            'name': 'Календарь выходных',
+            'app_label': 'calendar',
+            'models': [{
+                'name': 'Визуальный календарь',
+                'admin_url': reverse('admin_calendar'),
+                'view_only': True,
+            }]
+        }
+        app_list.append(custom_link)
+        return app_list

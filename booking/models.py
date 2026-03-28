@@ -44,34 +44,6 @@ class Booking(models.Model):
         verbose_name_plural = "Бронирования"
         ordering = ['-date', '-time']
 
-class WorkSchedule(models.Model):
-    """Рабочее расписание по дням недели"""
-    
-    WEEKDAYS = [
-        (0, 'Понедельник'),
-        (1, 'Вторник'),
-        (2, 'Среда'),
-        (3, 'Четверг'),
-        (4, 'Пятница'),
-        (5, 'Суббота'),
-        (6, 'Воскресенье'),
-    ]
-    
-    day = models.IntegerField(choices=WEEKDAYS, unique=True, verbose_name="День недели")
-    is_working = models.BooleanField(default=True, verbose_name="Рабочий день")
-    start_time = models.TimeField(default="09:00", verbose_name="Начало работы")
-    end_time = models.TimeField(default="18:00", verbose_name="Конец работы")
-    
-    def __str__(self):
-        days = dict(self.WEEKDAYS)
-        if self.is_working:
-            return f"{days[self.day]}: {self.start_time} - {self.end_time}"
-        return f"{days[self.day]}: Выходной"
-    
-    class Meta:
-        verbose_name = "Рабочее расписание"
-        verbose_name_plural = "Рабочее расписание"
-
 class DayOff(models.Model):
     """Выходные дни и нерабочие часы"""
     
