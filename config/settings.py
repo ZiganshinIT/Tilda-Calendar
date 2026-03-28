@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',      # добавляем DRF
     'corsheaders',         # добавляем CORS
     'booking',
+    'admining',
 ]
 
 MIDDLEWARE = [

@@ -16,20 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from booking import admin_views
 
 
 urlpatterns = [
-    path('admin/calendar/', admin_views.calendar_admin_view, name='admin_calendar'),
-    path('admin/calendar/data/', admin_views.get_calendar_data, name='calendar_data'),
-    path('admin/calendar/add_full_day/', admin_views.add_full_day_off, name='add_full_day'),
-    path('admin/calendar/add_hours/', admin_views.add_hours_off, name='add_hours'),
-    path('admin/calendar/delete/', admin_views.delete_day_off, name='delete_day_off'),
-    path('admin/calendar/booking/update/', admin_views.update_booking_status, name='update_booking'),
-    path('admin/calendar/booking/delete/', admin_views.delete_booking, name='delete_booking'),
-    path('admin/calendar/booking/detail/', admin_views.get_booking_detail, name='booking_detail'),
-
-    path('admin/', admin.site.urls),
-
+    #path('admin/', admin.site.urls),
+    path('admin/', include('admining.urls')),  # новое название
     path('', include('booking.urls')),  # добавляем наши URL
 ]

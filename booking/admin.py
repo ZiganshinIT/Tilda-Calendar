@@ -1,211 +1,89 @@
-# booking/admin.py
 from django.contrib import admin
-from django.contrib.auth.models import User, Group
-from django.urls import path
-from django.shortcuts import redirect
-from django.utils.safestring import mark_safe
+from django.urls import reverse
 from django.utils.html import format_html
+from admining.admin import myadmin
 from .models import Service, Booking, DayOff
 
-# Скрываем ненужные модели
-admin.site.unregister(User)
-admin.site.unregister(Group)
-
-@admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ['name', 'duration', 'price', 'color_preview', 'is_active']
+    list_display = ['name', 'duration', 'price', 'color_display', 'is_active']
+    list_editable = ['is_active']
     list_filter = ['is_active']
     search_fields = ['name']
     
-    def color_preview(self, obj):
+    def color_display(self, obj):
         return format_html(
-            '<div style="width: 20px; height: 20px; background: {}; border-radius: 50%; border: 1px solid #ddd;"></div>',
-            obj.color
+            '<span style="display: inline-block; width: 20px; height: 20px; background: {}; border-radius: 4px;"></span> {}',
+            obj.color, obj.color
         )
-    color_preview.short_description = 'Цвет'
+    color_display.short_description = 'Цвет'
 
-@admin.register(Booking)
+
 class BookingAdmin(admin.ModelAdmin):
-    # Убираем colored_status из list_display
-    list_display = ['client_name', 'service', 'date', 'time', 'comment_short', 'action_buttons']
+    list_display = ['client_name', 'service', 'date', 'time', 'status_badge', 'client_phone', 'status']  # добавили status
     list_filter = ['status', 'service', 'date']
-    search_fields = ['client_name', 'client_phone', 'comment']
+    search_fields = ['client_name', 'client_phone', 'client_email']
     date_hierarchy = 'date'
-    list_per_page = 20
-
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path('confirm-booking/<int:booking_id>/', self.confirm_booking, name='confirm-booking'),
-            path('complete-booking/<int:booking_id>/', self.complete_booking, name='complete-booking'),
-            path('cancel-booking/<int:booking_id>/', self.cancel_booking, name='cancel-booking'),
-        ]
-        return custom_urls + urls
-
-    def confirm_booking(self, request, booking_id):
-        try:
-            booking = Booking.objects.get(id=booking_id)
-            booking.status = 'confirmed'
-            booking.save()
-            self.message_user(request, f"✅ Запись #{booking_id} подтверждена")
-        except Booking.DoesNotExist:
-            self.message_user(request, f"❌ Запись #{booking_id} не найдена", level='error')
-        return redirect(request.META.get('HTTP_REFERER', '../'))
-
-    def complete_booking(self, request, booking_id):
-        try:
-            booking = Booking.objects.get(id=booking_id)
-            booking.status = 'completed'
-            booking.save()
-            self.message_user(request, f"✅ Запись #{booking_id} отмечена как выполненная")
-        except Booking.DoesNotExist:
-            self.message_user(request, f"❌ Запись #{booking_id} не найдена", level='error')
-        return redirect(request.META.get('HTTP_REFERER', '../'))
-
-    def cancel_booking(self, request, booking_id):
-        try:
-            booking = Booking.objects.get(id=booking_id)
-            booking.status = 'cancelled'
-            booking.save()
-            self.message_user(request, f"❌ Запись #{booking_id} отменена")
-        except Booking.DoesNotExist:
-            self.message_user(request, f"❌ Запись #{booking_id} не найдена", level='error')
-        return redirect(request.META.get('HTTP_REFERER', '../'))
-
-    def comment_short(self, obj):
-        if obj.comment:
-            if len(obj.comment) > 50:
-                return mark_safe(f'<span title="{obj.comment}">{obj.comment[:50]}...</span>')
-            return obj.comment
-        return "—"
-    comment_short.short_description = 'Комментарий'
+    list_editable = ['status']  # теперь status есть в list_display
     
-    def action_buttons(self, obj):
-        """Кнопки для каждой записи"""
-        
-        # Для выполненных - только сообщение
-        if obj.status == 'completed':
-            return mark_safe('<span style="color: #4CAF50; font-weight: bold;">✔️ Выполнено</span>')
-        
-        # Для отмененных - только сообщение
-        if obj.status == 'cancelled':
-            return mark_safe('<span style="color: #f44336; font-weight: bold;">❌ Отменено</span>')
-        
-        # Кнопка "Позвонить" для всех активных записей
-        call_button = f'<a href="tel:{obj.client_phone}" style="background: #FF9800; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 12px; margin-right: 5px; display: inline-block;" title="Позвонить">📞 Позвонить</a>'
-        
-        # Для подтвержденных - кнопки Выполнить и Отменить
-        if obj.status == 'confirmed':
-            buttons = []
-            buttons.append(
-                f'<a href="complete-booking/{obj.id}/" style="background: #4CAF50; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 12px; margin-right: 5px; display: inline-block;" onclick="return confirm(\'Отметить как выполненную?\')">✔️ Выполнено</a>'
-            )
-            buttons.append(
-                f'<a href="cancel-booking/{obj.id}/" style="background: #f44336; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 12px; display: inline-block;" onclick="return confirm(\'Отменить запись?\')">❌ Отменить</a>'
-            )
-            buttons.append(call_button)
-            return mark_safe(' '.join(buttons))
-        
-        # Для новых - кнопки Подтвердить, Выполнить, Отменить
-        if obj.status == 'new':
-            buttons = []
-            buttons.append(
-                f'<a href="confirm-booking/{obj.id}/" style="background: #2196F3; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 12px; margin-right: 5px; display: inline-block;" onclick="return confirm(\'Подтвердить запись?\')">✅ Подтвердить</a>'
-            )
-            buttons.append(
-                f'<a href="complete-booking/{obj.id}/" style="background: #4CAF50; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 12px; margin-right: 5px; display: inline-block;" onclick="return confirm(\'Отметить как выполненную?\')">✔️ Выполнено</a>'
-            )
-            buttons.append(
-                f'<a href="cancel-booking/{obj.id}/" style="background: #f44336; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 12px; display: inline-block;" onclick="return confirm(\'Отменить запись?\')">❌ Отменить</a>'
-            )
-            buttons.append(call_button)
-            return mark_safe(' '.join(buttons))
-        
-        return "—"
-    action_buttons.short_description = 'Действия'
+    def status_badge(self, obj):
+        colors = {
+            'new': 'orange',
+            'confirmed': 'green',
+            'cancelled': 'red',
+            'completed': 'blue',
+        }
+        statuses = {
+            'new': '🟡 Новая',
+            'confirmed': '✅ Подтверждена',
+            'cancelled': '❌ Отменена',
+            'completed': '✓ Выполнена',
+        }
+        return format_html(
+            '<span style="color: {};">{}</span>',
+            colors.get(obj.status, 'black'),
+            statuses.get(obj.status, obj.status)
+        )
+    status_badge.short_description = 'Статус'
 
-@admin.register(DayOff)
+
 class DayOffAdmin(admin.ModelAdmin):
-    list_display = ['display_info', 'type_badge', 'reason_badge', 'recurring_badge']
-    list_filter = ['type', 'reason', 'is_recurring']
-    search_fields = ['comment']
+    list_display = ['date', 'type_badge', 'time_display', 'reason_badge', 'comment_preview']
+    list_filter = ['type', 'reason']
+    search_fields = ['comment', 'date']
     date_hierarchy = 'date'
-    
-    fieldsets = (
-        ('Тип и дата', {
-            'fields': ('type', 'date', 'end_date', 'start_time', 'end_time')
-        }),
-        ('Информация', {
-            'fields': ('reason', 'comment', 'is_recurring')
-        }),
-    )
-    
-    def display_info(self, obj):
-        if obj.type == 'full_day':
-            return f"📅 {obj.date.strftime('%d.%m.%Y')}"
-        elif obj.type == 'range':
-            return f"📅 {obj.date.strftime('%d.%m.%Y')} - {obj.end_date.strftime('%d.%m.%Y')}"
-        else:
-            return f"⏰ {obj.date.strftime('%d.%m.%Y')} {obj.start_time} - {obj.end_time}"
-    display_info.short_description = 'Дата/Время'
     
     def type_badge(self, obj):
-        icons = {
-            'full_day': '📅',
-            'hours': '⏰',
-            'range': '📆',
+        types = {
+            'full_day': '🔴 Полный день',
+            'hours': '🟡 Нерабочие часы',
         }
-        names = {
-            'full_day': 'Весь день',
-            'hours': 'Часы',
-            'range': 'Диапазон',
-        }
-        return mark_safe(
-            f'<span style="background: #e3f2fd; color: #1976d2; padding: 3px 8px; border-radius: 12px; font-size: 11px;">{icons.get(obj.type, "📌")} {names.get(obj.type, obj.type)}</span>'
-        )
+        return types.get(obj.type, obj.type)
     type_badge.short_description = 'Тип'
     
+    def time_display(self, obj):
+        if obj.type == 'hours' and obj.start_time:
+            return f"{obj.start_time.strftime('%H:%M')} - {obj.end_time.strftime('%H:%M')}"
+        return '-'
+    time_display.short_description = 'Время'
+    
     def reason_badge(self, obj):
-        colors = {
-            'holiday': '#FF9800',
-            'vacation': '#2196F3',
-            'sick': '#f44336',
-            'event': '#9C27B0',
-            'technical': '#795548',
-            'other': '#999',
+        reasons = {
+            'holiday': '🎉 Праздник',
+            'vacation': '🏖️ Отпуск',
+            'sick': '🤒 Больничный',
+            'event': '📅 Мероприятие',
+            'technical': '🔧 Тех. работы',
+            'other': '📝 Другое',
         }
-        icons = {
-            'holiday': '🎉',
-            'vacation': '🏖️',
-            'sick': '🤒',
-            'event': '🎪',
-            'technical': '🔧',
-            'other': '📌',
-        }
-        return mark_safe(
-            f'<span style="background: {colors.get(obj.reason, "#999")}; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px;">{icons.get(obj.reason, "📌")} {obj.get_reason_display()}</span>'
-        )
+        return reasons.get(obj.reason, obj.reason)
     reason_badge.short_description = 'Причина'
     
-    def recurring_badge(self, obj):
-        if obj.is_recurring:
-            return mark_safe('<span style="color: #FF9800;">🔄 Каждый год</span>')
-        return "—"
-    recurring_badge.short_description = 'Повторение'
+    def comment_preview(self, obj):
+        return obj.comment[:50] + '...' if len(obj.comment) > 50 else obj.comment
+    comment_preview.short_description = 'Комментарий'
 
-class CustomAdminSite(admin.AdminSite):
-    def get_app_list(self, request):
-        app_list = super().get_app_list(request)
-        
-        # Добавляем кастомную ссылку в меню
-        custom_link = {
-            'name': 'Календарь выходных',
-            'app_label': 'calendar',
-            'models': [{
-                'name': 'Визуальный календарь',
-                'admin_url': reverse('admin_calendar'),
-                'view_only': True,
-            }]
-        }
-        app_list.append(custom_link)
-        return app_list
+
+# Регистрируем все модели
+myadmin.register(Service, ServiceAdmin)
+myadmin.register(Booking, BookingAdmin)
+myadmin.register(DayOff, DayOffAdmin)

@@ -1,19 +1,19 @@
 # admin_views.py
+import json
+import calendar
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import datetime, timedelta
-from .models import DayOff, Booking
-import calendar
+from booking.models import DayOff, Booking
 from django.views.decorators.csrf import csrf_exempt
-import json
 from django.db.models import Q
 
 @staff_member_required
 def calendar_admin_view(request):
     """Главная страница календаря в админке"""
-    return render(request, 'admin/calendar_admin.html', {
+    return render(request, 'admining/calendar_admin.html', {
         'now': timezone.now()
     })
 
