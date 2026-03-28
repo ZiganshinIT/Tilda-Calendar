@@ -1,7 +1,5 @@
 asgiref==3.11.1
 Django==6.0.3
-django-admin-interface==0.32.0
-django-colorfield==0.14.0
 django-cors-headers==4.9.0
 djangorestframework==3.17.0
 pillow==12.1.1
