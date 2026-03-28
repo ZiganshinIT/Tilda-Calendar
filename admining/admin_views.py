@@ -199,15 +199,30 @@ def delete_day_off(request):
 @staff_member_required
 @csrf_exempt
 def update_booking_status(request):
-    """API: изменить статус бронирования"""
+    """API: обновить бронирование (все поля)"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             booking_id = data.get('booking_id')
-            new_status = data.get('status')
             
             booking = Booking.objects.get(id=booking_id)
-            booking.status = new_status
+            
+            # Обновляем все поля, которые пришли
+            if 'client_name' in data:
+                booking.client_name = data['client_name']
+            if 'client_phone' in data:
+                booking.client_phone = data['client_phone']
+            if 'client_email' in data:
+                booking.client_email = data['client_email']
+            if 'date' in data and data['date']:
+                booking.date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+            if 'time' in data and data['time']:
+                booking.time = datetime.strptime(data['time'], '%H:%M').time()
+            if 'comment' in data:
+                booking.comment = data['comment']
+            if 'status' in data:
+                booking.status = data['status']
+            
             booking.save()
             
             return JsonResponse({
@@ -218,6 +233,8 @@ def update_booking_status(request):
             })
         except Booking.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Запись не найдена'}, status=404)
+        except ValueError as e:
+            return JsonResponse({'status': 'error', 'message': f'Ошибка формата данных: {str(e)}'}, status=400)
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     

@@ -211,7 +211,6 @@
     .form-group select, 
     .form-group textarea {
         width: 100%;
-        padding: 10px;
         border: 1px solid #ccc;
         border-radius: 6px;
         font-size: 14px;
@@ -242,45 +241,496 @@
         background: #e0e0e0;
         color: #333;
     }
-    
-    /* Стили для записей в модальном окне */
-    .booking-detail {
-        background: #f8f8f8;
-        padding: 12px;
-        margin-bottom: 12px;
+
+    /* Красивые карточки записей */
+    .bookings-list {
+        margin-top: 8px;
+        max-height: 110px;
+        overflow-y: auto;
+        overflow-x: hidden;  /* убираем горизонтальный скролл */
+        scrollbar-width: thin;
+    }
+
+    .bookings-list::-webkit-scrollbar {
+        width: 4px;
+        height: 0;  /* убираем горизонтальный скролл */
+    }
+
+    .bookings-list::-webkit-scrollbar-track {
+        background: #f0f0f0;
+        border-radius: 4px;
+    }
+
+    .bookings-list::-webkit-scrollbar-thumb {
+        background: #c0c0c0;
+        border-radius: 4px;
+    }
+
+    .booking-card {
+        background: linear-gradient(135deg, #fff 0%, #fafafa 100%);
+        margin-bottom: 6px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        border-left: 4px solid;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;  /* разрешаем перенос на новую строку */
+    }
+
+    .booking-card:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        background: #fff;
+    }
+
+    .booking-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+        font-size: 11px;
+        background: rgba(0,0,0,0.03);
+        padding: 4px 10px;
+        border-radius: 20px;
+        flex-shrink: 0;  /* не сжимается */
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .status-dot.new { background: #ff9800; box-shadow: 0 0 4px #ff9800; }
+    .status-dot.confirmed { background: #4caf50; box-shadow: 0 0 4px #4caf50; }
+    .status-dot.cancelled { background: #f44336; box-shadow: 0 0 4px #f44336; }
+    .status-dot.completed { background: #2196f3; box-shadow: 0 0 4px #2196f3; }
+
+    .booking-client {
+        flex: 1;
+        font-size: 11px;
+        color: #555;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 500;
+        min-width: 0;  /* разрешаем ужиматься */
+    }
+
+    .booking-service {
+        font-size: 9px;
+        color: #888;
+        background: #f5f5f5;
+        padding: 2px 6px;
+        border-radius: 12px;
+        white-space: nowrap;
+        flex-shrink: 0;  /* не сжимается */
+    }
+
+    /* Счетчик записей */
+    .bookings-count {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 11px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        flex-shrink: 0;
+    }
+
+    .bookings-count:hover {
+        transform: scale(1.05);
+    }
+
+    /* Кнопка "еще" */
+    .more-bookings {
+        background: #f0f0f0;
+        text-align: center;
+        padding: 6px;
         border-radius: 8px;
-        border-left: 3px solid;
+        font-size: 11px;
+        font-weight: 500;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 4px;
+    }
+
+    .more-bookings:hover {
+        background: #e0e0e0;
+        color: #333;
+    }
+
+    /* Адаптивность для маленьких экранов */
+    @media (max-width: 480px) {
+        .booking-card {
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .booking-time {
+            font-size: 10px;
+            padding: 2px 8px;
+        }
+        
+        .booking-client {
+            font-size: 10px;
+            width: 100%;  /* на мобильных имя на всю ширину */
+            white-space: normal;
+        }
+        
+        .booking-service {
+            font-size: 8px;
+        }
+    }
+    
+    
+    /* Модальное окно записей дня */
+/* Модальное окно записей дня */
+.day-detail-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.day-detail-content {
+    background: white;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 600px;
+    height: auto;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.day-detail-header {
+    background: linear-gradient(135deg, #2c3e50, #1a2632);
+    color: white;
+    padding: 20px 24px;
+    border-radius: 24px 24px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.day-detail-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.day-detail-header .add-dayoff-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.day-detail-header .add-dayoff-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.day-detail-body {
+    padding: 20px 24px;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    max-height: 600px;
+}
+
+/* Стилизация скроллбара */
+.day-detail-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.day-detail-body::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 10px;
+}
+
+.day-detail-body::-webkit-scrollbar-thumb {
+    background: #c0c0c0;
+    border-radius: 10px;
+}
+
+.day-detail-body::-webkit-scrollbar-thumb:hover {
+    background: #a0a0a0;
+}
+
+/* Информационные блоки */
+.info-block {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-left: 4px solid;
+}
+
+.info-block.dayoff {
+    border-left-color: #e74c3c;
+    background: linear-gradient(135deg, #f8f9fa, #fff0f0);
+}
+
+.info-block.hours {
+    border-left-color: #f39c12;
+    background: linear-gradient(135deg, #f8f9fa, #fff8f0);
+}
+
+.info-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.info-text {
+    flex: 1;
+}
+
+.info-text strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.info-text span {
+    font-size: 13px;
+    color: #666;
+}
+
+/* Список записей */
+.bookings-section {
+    margin-top: 20px;
+}
+
+.bookings-section h4 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+/* Карточка записи */
+.booking-detail-card {
+    background: white;
+    border: 1px solid #e8e8e8;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.booking-detail-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: transparent;
+}
+
+.booking-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    background: #fafafa;
+    border-left: 4px solid;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.booking-time-large {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.booking-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-new {
+    background: #fff3e0;
+    color: #ff9800;
+}
+.status-confirmed {
+    background: #e8f5e9;
+    color: #4caf50;
+}
+.status-cancelled {
+    background: #ffebee;
+    color: #f44336;
+}
+.status-completed {
+    background: #e3f2fd;
+    color: #2196f3;
+}
+
+.booking-detail-body {
+    padding: 14px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.detail-field {
+    flex: 1;
+    min-width: calc(50% - 12px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.detail-field .field-icon {
+    font-size: 16px;
+    width: 24px;
+    flex-shrink: 0;
+}
+
+.detail-field .field-label {
+    color: #888;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.detail-field .field-value {
+    color: #333;
+    font-weight: 500;
+    word-break: break-word;
+    flex: 1;
+}
+
+/* Ссылка на телефон */
+.phone-link {
+    color: #2196f3;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.phone-link:hover {
+    color: #0b7dda;
+    text-decoration: underline;
+}
+
+/* Комментарий на всю ширину */
+.comment-field {
+    width: 100%;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #e0e0e0;
+}
+
+/* Пустое состояние */
+.empty-bookings {
+    text-align: center;
+    padding: 50px 20px;
+    color: #999;
+    background: #fafafa;
+    border-radius: 16px;
+}
+
+.empty-bookings .empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+/* Кнопка закрытия */
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+    flex-shrink: 0;
+    background: white;
+    border-radius: 0 0 24px 24px;
+}
+
+.close-modal-btn {
+    background: #e0e0e0;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.close-modal-btn:hover {
+    background: #d0d0d0;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 600px) {
+    .day-detail-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .day-detail-header {
+        padding: 16px;
+    }
+    
+    .day-detail-header h3 {
+        font-size: 16px;
+    }
+    
+    .day-detail-body {
+        padding: 16px;
+    }
+    
+    .detail-field {
+        min-width: 100%;
     }
     
     .booking-detail-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-        flex-wrap: wrap;
-        gap: 5px;
+        flex-direction: column;
+        align-items: flex-start;
     }
-    
-    .booking-status-badge {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        margin-right: 5px;
-    }
-    
-    .status-new { background: #ff9800; }
-    .status-confirmed { background: #4caf50; }
-    .status-cancelled { background: #f44336; }
-    .status-completed { background: #2196f3; }
-    
-    .day-detail-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-    }
+}
     
     .add-dayoff-btn {
         background: #ffaa44;
@@ -290,6 +740,136 @@
         border-radius: 4px;
         cursor: pointer;
         font-size: 12px;
+    }
+
+    /* Блокировка скролла страницы при открытом модальном окне */
+    body.modal-open {
+        overflow: hidden;
+        height: 100%;
+    }
+
+    /* Уведомления */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-size: 14px;
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .notification.success {
+        background: #4caf50;
+    }
+
+    .notification.error {
+        background: #f44336;
+    }
+
+    .notification.info {
+        background: #2196f3;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+        }
+    }
+
+    /* Confirm модальное окно */
+    .confirm-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10001;
+    }
+
+    .confirm-content {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.2s ease;
+    }
+
+    .confirm-content h3 {
+        margin-bottom: 12px;
+        color: #2c3e50;
+        font-size: 18px;
+    }
+
+    .confirm-content p {
+        margin-bottom: 20px;
+        color: #666;
+        line-height: 1.5;
+    }
+
+    .confirm-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+
+    .confirm-buttons button {
+        padding: 8px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .confirm-buttons .confirm-yes {
+        background: #4caf50;
+        color: white;
+    }
+
+    .confirm-buttons .confirm-yes:hover {
+        background: #45a049;
+    }
+
+    .confirm-buttons .confirm-no {
+        background: #e0e0e0;
+        color: #333;
+    }
+
+    .confirm-buttons .confirm-no:hover {
+        background: #d0d0d0;
+    }
+
+    .confirm-buttons .confirm-danger {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .confirm-buttons .confirm-danger:hover {
+        background: #c0392b;
     }
     
     /* ========== ДЕСКТОП (больше 768px) ========== */
@@ -543,14 +1123,9 @@
 </div>
 
 <!-- Модальное окно для деталей дня (мобильная версия) -->
-<div id="dayDetailModal" class="modal">
-    <div class="modal-content">
-        <div id="dayDetailContent">
-            Загрузка...
-        </div>
-        <div class="modal-buttons">
-            <button type="button" class="btn-secondary" onclick="closeDayDetailModal()">Закрыть</button>
-        </div>
+<div id="dayDetailModal" class="day-detail-modal" style="display: none;">
+    <div class="day-detail-content">
+        <div id="dayDetailContent"></div>
     </div>
 </div>
 
@@ -586,7 +1161,6 @@ function renderCalendar(data) {
     
     let html = '';
     
-    // Пустые ячейки
     for (let i = 0; i < firstWeekday; i++) {
         html += `<div class="calendar-day" style="background: #fafafa; opacity: 0.5;"></div>`;
     }
@@ -596,94 +1170,77 @@ function renderCalendar(data) {
         let deleteBtn = '';
         
         if (day.is_full_day_off) {
-            bgColor = 'background: #ffe0e0;';
+            bgColor = 'background: #fff0f0;';
             if (day.off_id) {
                 deleteBtn = `<button class="delete-btn" onclick="deleteDayOff(${day.off_id}, event)">✖</button>`;
             }
         }
         
-        // СОРТИРУЕМ ЗАПИСИ ПО ВРЕМЕНИ
+        // Сортируем записи по времени
         let sortedBookings = [];
         if (day.bookings && day.bookings.length > 0) {
-            sortedBookings = [...day.bookings].sort((a, b) => {
-                return a.time.localeCompare(b.time);
+            sortedBookings = [...day.bookings].sort((a, b) => a.time.localeCompare(b.time));
+        }
+        
+        // Баджи выходных
+        let badges = '';
+        if (day.is_full_day_off) {
+            badges = `<div class="day-off-badge">🚫 ${day.off_reason || 'Выходной'}</div>`;
+        } else if (day.off_hours && day.off_hours.length > 0) {
+            day.off_hours.forEach(off => {
+                badges += `<div class="hours-off-badge">⏰ ${off.start}-${off.end}</div>`;
             });
         }
         
-        // Индикаторы для мобильных
-        let indicators = '';
-        if (isMobile) {
-            if (day.is_full_day_off) {
-                indicators += `<span class="indicator-dayoff">🚫</span>`;
-            } else if (day.off_hours && day.off_hours.length > 0) {
-                indicators += `<span class="indicator-hours-off">⏰</span>`;
-            }
+        // Карточки записей (только просмотр)
+        let bookingsHtml = '';
+        if (sortedBookings.length > 0 && !day.is_full_day_off) {
+            const maxShow = isMobile ? 2 : 3;
+            bookingsHtml = `<div class="bookings-list">`;
             
-            if (sortedBookings.length > 0 && !day.is_full_day_off) {
-                indicators += `<span class="indicator-booking">${sortedBookings.length}</span>`;
+            sortedBookings.slice(0, maxShow).forEach(booking => {
+                const statusClass = `status-dot ${booking.status}`;
+                
+                bookingsHtml += `
+                    <div class="booking-card" style="border-left-color: ${booking.service_color}"
+                         onclick="event.stopPropagation(); openBookingEditModal(${booking.id})">
+                        <div class="booking-time">
+                            <span class="${statusClass}"></span>
+                            ${booking.time}
+                        </div>
+                        <div class="booking-client" title="${escapeHtml(booking.client_name)}">
+                            ${escapeHtml(booking.client_name.substring(0, 15))}
+                        </div>
+                        <div class="booking-service">
+                            ${booking.service_name.substring(0, 8)}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if (sortedBookings.length > maxShow) {
+                bookingsHtml += `
+                    <div class="more-bookings" onclick="event.stopPropagation(); openDayDetailModal('${day.date}')">
+                        📋 + еще ${sortedBookings.length - maxShow}
+                    </div>
+                `;
             }
+            bookingsHtml += `</div>`;
         }
         
-        // Десктопная версия (полная информация)
-        let desktopContent = '';
-        if (!isMobile) {
-            // Баджи выходных
-            let badges = '';
-            if (day.is_full_day_off) {
-                badges += `<div class="day-off-badge">🚫 ${day.off_reason || 'Выходной'}</div>`;
-            } else if (day.off_hours && day.off_hours.length > 0) {
-                day.off_hours.forEach(off => {
-                    badges += `<div class="hours-off-badge">⏰ ${off.start}-${off.end}</div>`;
-                });
-            }
-            
-            // Список записей (отсортированный)
-            let bookingsHtml = '';
-            if (sortedBookings.length > 0) {
-                bookingsHtml = `<div class="bookings-list">`;
-                sortedBookings.slice(0, 3).forEach(booking => {
-                    const statusClass = `status-${booking.status}`;
-                    const statusText = {
-                        'new': '🟡',
-                        'confirmed': '✅',
-                        'cancelled': '❌',
-                        'completed': '✓'
-                    }[booking.status] || '●';
-                    
-                    bookingsHtml += `
-                        <div class="booking-item" style="border-left-color: ${booking.service_color}" 
-                             onclick="event.stopPropagation(); openBookingEditModal(${booking.id})">
-                            <div class="booking-time">
-                                <span class="booking-status-badge ${statusClass}"></span>
-                                ${statusText} ${booking.time}
-                            </div>
-                            <div class="booking-client">${escapeHtml(booking.client_name.substring(0, 15))}</div>
-                        </div>
-                    `;
-                });
-                if (sortedBookings.length > 3) {
-                    bookingsHtml += `<div class="booking-item" style="text-align:center; background:#e0e0e0;"
-                                      onclick="event.stopPropagation(); openDayDetailModal('${day.date}')">
-                                      📋 + еще ${sortedBookings.length - 3}
-                                      </div>`;
-                }
-                bookingsHtml += `</div>`;
-            }
-            
-            desktopContent = `
-                <div class="day-badges">${badges}</div>
-                ${bookingsHtml}
-            `;
-        }
+        // Счетчик записей
+        const bookingsCountBadge = sortedBookings.length > 0 && !day.is_full_day_off ? 
+            `<span class="bookings-count" onclick="event.stopPropagation(); openDayDetailModal('${day.date}')">${sortedBookings.length}</span>` : '';
         
         html += `
-            <div class="calendar-day" style="${bgColor}" onclick="openDayDetailModal('${day.date}')">
+            <div class="calendar-day" style="${bgColor}" onclick="openDayModal('${day.date}', ${day.is_full_day_off})">
                 ${deleteBtn}
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <span class="day-number">${day.day_num}</span>
+                    ${bookingsCountBadge}
                 </div>
-                ${desktopContent}
-                <div class="day-indicators">${indicators}</div>
+                <div class="day-badges">${badges}</div>
+                ${bookingsHtml}
             </div>
         `;
     });
@@ -697,80 +1254,129 @@ function openDayDetailModal(date) {
     const content = document.getElementById('dayDetailContent');
     
     modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+    
+    // Закрытие при клике на фон
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            closeDayDetailModal();
+        }
+    };
+    
     content.innerHTML = '<div style="text-align:center; padding:40px;">Загрузка...</div>';
     
-    // Получаем данные за этот день
     fetch(`/admin/calendar/data/?year=${currentYear}&month=${currentMonth}`)
         .then(response => response.json())
         .then(data => {
             const dayData = data.days.find(d => d.date === date);
             if (!dayData) {
-                content.innerHTML = '<div style="color:red;">Ошибка загрузки данных</div>';
+                content.innerHTML = '<div style="color:red; padding:20px;">Ошибка загрузки</div>';
                 return;
-            }
-            
-            // СОРТИРУЕМ ЗАПИСИ ПО ВРЕМЕНИ
-            let sortedBookings = [];
-            if (dayData.bookings && dayData.bookings.length > 0) {
-                sortedBookings = [...dayData.bookings].sort((a, b) => {
-                    return a.time.localeCompare(b.time);
-                });
             }
             
             const dateObj = new Date(date);
             const weekdayNames = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            
+            let sortedBookings = [];
+            if (dayData.bookings && dayData.bookings.length > 0) {
+                sortedBookings = [...dayData.bookings].sort((a, b) => a.time.localeCompare(b.time));
+            }
             
             let html = `
                 <div class="day-detail-header">
-                    <h3>📅 ${dateObj.getDate()} ${data.month_name}, ${weekdayNames[dayData.weekday]}</h3>
+                    <h3>📅 ${dateObj.getDate()} ${monthNames[dateObj.getMonth()]}, ${weekdayNames[dayData.weekday]}</h3>
                     <button class="add-dayoff-btn" onclick="closeDayDetailModal(); openDayModal('${date}', ${dayData.is_full_day_off})">
-                        ➕ Выходной
+                        ➕ Добавить выходной
                     </button>
                 </div>
+                <div class="day-detail-body">
             `;
             
-            // Информация о выходных
             if (dayData.is_full_day_off) {
-                html += `<div style="background:#ffe0e0; padding:10px; border-radius:8px; margin-bottom:15px;">
-                            🚫 Выходной день: ${dayData.off_reason || 'нерабочий день'}
-                         </div>`;
+                html += `
+                    <div class="info-block dayoff">
+                        <div class="info-icon">🚫</div>
+                        <div class="info-text">
+                            <strong>Выходной день</strong>
+                            <span>${dayData.off_reason || 'нерабочий день'}</span>
+                        </div>
+                    </div>
+                `;
             } else if (dayData.off_hours && dayData.off_hours.length > 0) {
                 dayData.off_hours.forEach(off => {
-                    html += `<div style="background:#fff0e0; padding:10px; border-radius:8px; margin-bottom:15px;">
-                                ⏰ Нерабочие часы: ${off.start} - ${off.end} (${off.reason})
-                            </div>`;
+                    html += `
+                        <div class="info-block hours">
+                            <div class="info-icon">⏰</div>
+                            <div class="info-text">
+                                <strong>Нерабочие часы</strong>
+                                <span>${off.start} - ${off.end} (${off.reason})</span>
+                            </div>
+                        </div>
+                    `;
                 });
             }
             
-            // Записи (отсортированные по времени)
             if (sortedBookings.length > 0) {
-                html += `<h4>📋 Записи (${sortedBookings.length})</h4>`;
-                html += `<div style="max-height: 400px; overflow-y: auto;">`;
+                html += `
+                    <div class="bookings-section">
+                        <h4>📋 Записи <span style="font-size: 13px; color: #888;">(${sortedBookings.length})</span></h4>
+                `;
                 
                 sortedBookings.forEach(booking => {
                     const statusText = {
-                        'new': '🟡 Новая',
-                        'confirmed': '✅ Подтверждена',
-                        'cancelled': '❌ Отменена',
-                        'completed': '✓ Выполнена'
+                        'new': 'Новая',
+                        'confirmed': 'Подтверждена',
+                        'cancelled': 'Отменена',
+                        'completed': 'Выполнена'
                     }[booking.status] || booking.status;
                     
+                    const statusClass = `status-${booking.status}`;
+                    const phoneLink = `tel:${booking.client_phone.replace(/[^0-9+]/g, '')}`;
+                    
                     html += `
-                        <div class="booking-detail" style="border-left-color: ${booking.service_color}" 
-                             onclick="closeDayDetailModal(); openBookingEditModal(${booking.id})">
-                            <div class="booking-detail-header">
-                                <strong>⏰ ${booking.time}</strong>
-                                <span>${statusText}</span>
+                        <div class="booking-detail-card" onclick="closeDayDetailModal(); openBookingEditModal(${booking.id})">
+                            <div class="booking-detail-header" style="border-left-color: ${booking.service_color}">
+                                <div class="booking-time-large">
+                                    <span>⏰</span> ${booking.time}
+                                </div>
+                                <div class="booking-status-badge ${statusClass}">
+                                    ${booking.status === 'new' ? '🟡' : booking.status === 'confirmed' ? '✅' : booking.status === 'cancelled' ? '❌' : '✓'} ${statusText}
+                                </div>
                             </div>
-                            <div><strong>👤 Клиент:</strong> ${escapeHtml(booking.client_name)}</div>
-                            <div><strong>📞 Телефон:</strong> ${booking.client_phone}</div>
-                            <div><strong>💼 Услуга:</strong> ${booking.service_name}</div>
-                            <div><strong>💰 Цена:</strong> ${booking.price} ₽</div>
-                            <div style="margin-top:10px;">
-                                <button class="btn-primary" style="padding:6px 12px; font-size:12px;" 
-                                        onclick="event.stopPropagation(); closeDayDetailModal(); openBookingEditModal(${booking.id})">
-                                    ✏️ Редактировать
-                                </button>
+                            <div class="booking-detail-body">
+                                <div class="detail-field">
+                                    <span class="field-icon">👤</span>
+                                    <span class="field-label">Клиент:</span>
+                                    <span class="field-value">${escapeHtml(booking.client_name)}</span>
+                                </div>
+                                <div class="detail-field">
+                                    <span class="field-icon">📞</span>
+                                    <span class="field-label">Телефон:</span>
+                                    <a href="${phoneLink}" class="field-value phone-link" onclick="event.stopPropagation()">${booking.client_phone}</a>
+                                </div>
+                                <div class="detail-field">
+                                    <span class="field-icon">💼</span>
+                                    <span class="field-label">Услуга:</span>
+                                    <span class="field-value">${escapeHtml(booking.service_name)}</span>
+                                </div>
+                                <div class="detail-field">
+                                    <span class="field-icon">⏱️</span>
+                                    <span class="field-label">Длительность:</span>
+                                    <span class="field-value">${booking.duration} мин</span>
+                                </div>
+                                <div class="detail-field">
+                                    <span class="field-icon">💰</span>
+                                    <span class="field-label">Стоимость:</span>
+                                    <span class="field-value">${booking.price} ₽</span>
+                                </div>
+                                ${booking.comment ? `
+                                <div class="detail-field comment-field">
+                                    <span class="field-icon">💬</span>
+                                    <span class="field-label">Комментарий:</span>
+                                    <span class="field-value">${escapeHtml(booking.comment)}</span>
+                                </div>
+                                ` : ''}
                             </div>
                         </div>
                     `;
@@ -778,18 +1384,39 @@ function openDayDetailModal(date) {
                 
                 html += `</div>`;
             } else {
-                html += `<div style="text-align:center; padding:30px; color:#666;">📭 Нет записей на этот день</div>`;
+                html += `
+                    <div class="empty-bookings">
+                        <div class="empty-icon">📭</div>
+                        <div>Нет записей на этот день</div>
+                    </div>
+                `;
             }
+            
+            html += `
+                </div>
+                <div class="modal-footer">
+                    <button class="close-modal-btn" onclick="closeDayDetailModal()">Закрыть</button>
+                </div>
+            `;
             
             content.innerHTML = html;
         })
         .catch(error => {
-            content.innerHTML = `<div style="color:red;">Ошибка загрузки: ${error.message}</div>`;
+            content.innerHTML = `<div style="color:red; padding:20px;">Ошибка загрузки: ${error.message}</div>`;
         });
 }
 
 function closeDayDetailModal() {
+    const modal = document.getElementById('dayDetailModal');
+    modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+    // Убираем обработчик
+    modal.onclick = null;
+}
+
+function closeDayDetailModal() {
     document.getElementById('dayDetailModal').style.display = 'none';
+    document.body.classList.remove('modal-open'); // возвращаем скролл
 }
 
 // Функция открытия списка записей дня (если используется)
@@ -845,7 +1472,14 @@ function openBookingEditModal(bookingId) {
     const content = document.getElementById('bookingDetailContent');
     
     modal.style.display = 'flex';
-    content.innerHTML = '<div class="loading-detail" style="text-align: center; padding: 40px;">Загрузка данных...</div>';
+    document.body.classList.add('modal-open');
+
+     // Закрытие при клике на фон
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            closeBookingEditModal();
+        }
+    };
     
     fetch(`/admin/calendar/booking/detail/?id=${bookingId}`)
         .then(response => response.json())
@@ -945,26 +1579,37 @@ function updateBooking(bookingId) {
     const comment = document.getElementById('editComment').value;
     const status = document.getElementById('editStatus').value;
     
-    // Сначала обновляем статус (можно сделать отдельный API для полного обновления)
     fetch('/admin/calendar/booking/update/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCookie('csrftoken')
         },
-        body: JSON.stringify({ booking_id: bookingId, status: status })
+        body: JSON.stringify({ 
+            booking_id: bookingId,
+            client_name: clientName,
+            client_phone: clientPhone,
+            client_email: clientEmail,
+            date: date,
+            time: time,
+            comment: comment,
+            status: status
+        })
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert('Статус обновлен!');
+            showNotification('✅ Запись успешно обновлена', 'success');
             closeBookingEditModal();
-            loadCalendar(); // Обновляем календарь
+            loadCalendar();
         } else {
-            alert('Ошибка: ' + data.message);
+            showNotification('❌ Ошибка: ' + (data.message || 'неизвестная ошибка'), 'error');
         }
     })
-    .catch(error => alert('Ошибка: ' + error));
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('❌ Ошибка соединения с сервером', 'error');
+    });
 }
 
 // Быстрое подтверждение
@@ -979,34 +1624,49 @@ function completeBooking(bookingId) {
 
 // Быстрая отмена
 function cancelBooking(bookingId) {
-    if (confirm('Отменить эту запись?')) {
-        updateBookingStatus(bookingId, 'cancelled');
-    }
+    customConfirm('Отменить эту запись?', 
+        () => {
+            updateBookingStatus(bookingId, 'cancelled');
+        },
+        () => {
+            showNotification('Отмена отменена', 'info');
+        }
+    );
 }
 
 // Удаление записи
 function deleteBooking(bookingId) {
-    if (confirm('Удалить эту запись безвозвратно?')) {
-        fetch('/admin/calendar/booking/delete/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({ booking_id: bookingId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert('Запись удалена');
-                closeBookingEditModal();
-                loadCalendar(); // Обновляем календарь
-            } else {
-                alert('Ошибка: ' + data.message);
-            }
-        })
-        .catch(error => alert('Ошибка: ' + error));
-    }
+    customConfirm('Вы уверены, что хотите удалить эту запись?\nЭто действие нельзя отменить.', 
+        () => {
+            // Подтверждение
+            fetch('/admin/calendar/booking/delete/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ booking_id: bookingId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showNotification('🗑️ Запись удалена', 'success');
+                    closeBookingEditModal();
+                    loadCalendar();
+                } else {
+                    showNotification('❌ Ошибка: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('❌ Ошибка соединения с сервером', 'error');
+            });
+        },
+        () => {
+            // Отмена
+            showNotification('Действие отменено', 'info');
+        },
+        true // опасное действие
+    );
 }
 
 // Вспомогательная функция для обновления статуса
@@ -1017,23 +1677,38 @@ function updateBookingStatus(bookingId, status) {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCookie('csrftoken')
         },
-        body: JSON.stringify({ booking_id: bookingId, status: status })
+        body: JSON.stringify({ 
+            booking_id: bookingId, 
+            status: status 
+        })
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert(`Статус изменен на: ${data.status_display}`);
+            const statusText = {
+                'new': 'Новая',
+                'confirmed': 'Подтверждена',
+                'cancelled': 'Отменена',
+                'completed': 'Выполнена'
+            }[status] || status;
+            showNotification(`✅ Статус изменен на "${statusText}"`, 'success');
             closeBookingEditModal();
-            loadCalendar(); // Обновляем календарь
+            loadCalendar();
         } else {
-            alert('Ошибка: ' + data.message);
+            showNotification('❌ Ошибка: ' + (data.message || 'неизвестная ошибка'), 'error');
         }
     })
-    .catch(error => alert('Ошибка: ' + error));
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('❌ Ошибка соединения с сервером', 'error');
+    });
 }
 
 function closeBookingEditModal() {
-    document.getElementById('bookingEditModal').style.display = 'none';
+    const modal = document.getElementById('bookingEditModal');
+    modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+    modal.onclick = null;
 }
 
 // Функция для экранирования HTML
@@ -1049,6 +1724,18 @@ function closeBookingsModal() {
 }
 
 function openDayModal(date, isFullDayOff) {
+    const modal = document.getElementById('dayOffModal');
+    
+    modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+    
+    // Закрытие при клике на фон
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+
     document.getElementById('selectedDate').value = date;
     document.getElementById('modalDate').value = date;
     
@@ -1066,30 +1753,41 @@ function openDayModal(date, isFullDayOff) {
 }
 
 function closeModal() {
-    document.getElementById('dayOffModal').style.display = 'none';
+    const modal = document.getElementById('dayOffModal');
+    modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+    modal.onclick = null;
     document.getElementById('dayOffForm').reset();
 }
 
 function deleteDayOff(id, event) {
     event.stopPropagation();
-    
-    if (confirm('Удалить этот выходной?')) {
-        fetch('/admin/calendar/delete/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({ id: id })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                loadCalendar();
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
+    customConfirm('Удалить этот выходной день?', 
+        () => {
+            fetch('/admin/calendar/delete/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showNotification('✅ Выходной удален', 'success');
+                    loadCalendar();
+                } else {
+                    showNotification('❌ Ошибка удаления', 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('❌ Ошибка соединения с сервером', 'error');
+            });
+        },
+        null,
+        true
+    );
 }
 
 // Обработка форм
@@ -1111,12 +1809,10 @@ document.getElementById('dayOffForm').addEventListener('submit', function(e) {
         url = '/admin/calendar/add_hours/';
         const startTime = document.getElementById('startTime').value;
         const endTime = document.getElementById('endTime').value;
-        
         if (!startTime || !endTime) {
-            alert('Укажите время');
+            showNotification('⏰ Укажите время', 'error');
             return;
         }
-        
         body = { date, start_time: startTime, end_time: endTime, reason, comment };
     }
     
@@ -1131,13 +1827,19 @@ document.getElementById('dayOffForm').addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
+            showNotification('✅ Выходной добавлен', 'success');
             closeModal();
             loadCalendar();
+        } else if (data.status === 'exists') {
+            showNotification('⚠️ На этот день уже есть выходной', 'error');
         } else {
-            alert('Ошибка: ' + (data.message || 'неизвестная ошибка'));
+            showNotification('❌ Ошибка: ' + (data.message || 'неизвестная ошибка'), 'error');
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('❌ Ошибка соединения с сервером', 'error');
+    });
 });
 
 function prevMonth() {
@@ -1173,6 +1875,68 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+function showNotification(message, type = 'success') {
+    // Удаляем старые уведомления
+    const oldNotifications = document.querySelectorAll('.notification');
+    oldNotifications.forEach(notif => notif.remove());
+    
+    // Создаем новое уведомление
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Автоматически скрываем через 3 секунды
+    setTimeout(() => {
+        notification.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+function customConfirm(message, onConfirm, onCancel, isDanger = false) {
+    // Удаляем старый confirm, если есть
+    const oldConfirm = document.querySelector('.confirm-modal');
+    if (oldConfirm) oldConfirm.remove();
+    
+    // Создаем модальное окно
+    const modal = document.createElement('div');
+    modal.className = 'confirm-modal';
+    modal.innerHTML = `
+        <div class="confirm-content">
+            <h3>📋 Подтверждение</h3>
+            <p>${message}</p>
+            <div class="confirm-buttons">
+                <button class="confirm-no">Отмена</button>
+                <button class="${isDanger ? 'confirm-danger' : 'confirm-yes'}">${isDanger ? 'Удалить' : 'Да'}</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Закрытие по клику вне окна
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            if (onCancel) onCancel();
+        }
+    });
+    
+    // Кнопка "Отмена"
+    const noBtn = modal.querySelector('.confirm-no');
+    noBtn.addEventListener('click', () => {
+        modal.remove();
+        if (onCancel) onCancel();
+    });
+    
+    // Кнопка подтверждения
+    const yesBtn = modal.querySelector('.confirm-yes, .confirm-danger');
+    yesBtn.addEventListener('click', () => {
+        modal.remove();
+        if (onConfirm) onConfirm();
+    });
 }
 
 loadCalendar();
