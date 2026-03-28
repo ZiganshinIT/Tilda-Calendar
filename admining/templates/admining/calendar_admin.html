@@ -1309,7 +1309,7 @@ function renderCalendar(data) {
             `<span class="bookings-count" onclick="event.stopPropagation(); openDayDetailModal('${day.date}')">${sortedBookings.length}</span>` : '';
         
         html += `
-            <div class="calendar-day" style="${bgColor}" onclick="openDayModal('${day.date}', ${day.is_full_day_off})">
+            <div class="calendar-day" style="${bgColor}" onclick="openDayDetailModal('${day.date}')">
                 ${deleteBtn}
                 <div class="day-header">
                     <span class="day-number">${day.day_num}</span>
