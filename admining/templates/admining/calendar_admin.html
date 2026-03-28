@@ -874,6 +874,14 @@
     
     /* ========== ДЕСКТОП (больше 768px) ========== */
     @media (min-width: 769px) {
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+        
         .calendar-day {
             min-height: 180px;
         }
@@ -925,50 +933,91 @@
     }
     
     /* ========== МОБИЛЬНЫЕ (до 768px) ========== */
-    @media (max-width: 768px) {
-        .calendar-container {
-            padding: 10px;
-            margin: 5px;
-        }
-        
-        .calendar-day {
-            min-height: 70px;
-            padding: 6px;
-        }
-        
-        .day-number {
-            font-size: 14px;
-            padding: 2px 6px;
-        }
-        
-        .weekday {
-            padding: 6px 2px;
-            font-size: 11px;
-        }
-        
-        .month-title {
-            font-size: 18px;
-        }
-        
-        .calendar-nav button {
-            padding: 6px 10px;
-            font-size: 12px;
-        }
-        
-        /* Скрываем полную информацию, показываем только индикаторы */
-        .bookings-list,
-        .work-hours,
-        .day-off-badge,
-        .hours-off-badge {
-            display: none;
-        }
-        
-        .day-indicators {
-            display: flex;
-            margin-top: 6px;
-        }
-        
+@media (max-width: 768px) {
+    .calendar-container {
+        padding: 8px;
+        margin: 0;
+        overflow-x: hidden;
     }
+    
+    .calendar-grid {
+        gap: 3px;
+    }
+    
+    .calendar-day {
+        min-height: 65px;
+        padding: 5px;
+        position: relative;
+    }
+    
+    .day-number {
+        font-size: 12px;
+        padding: 2px 5px;
+        display: inline-block;
+    }
+    
+    .weekday {
+        padding: 5px 2px;
+        font-size: 10px;
+    }
+    
+    .month-title {
+        font-size: 16px;
+    }
+    
+    .calendar-nav button {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+    
+    /* Скрываем полную информацию, показываем только индикаторы */
+    .bookings-list,
+    .work-hours,
+    .day-off-badge,
+    .hours-off-badge {
+        display: none;
+    }
+    
+    .day-indicators {
+        display: flex;
+        margin-top: 5px;
+        gap: 4px;
+    }
+    
+    /* Фиксированный размер индикаторов, чтобы не ломали сетку */
+    .indicator-booking,
+    .indicator-dayoff,
+    .indicator-hours-off {
+        width: 22px;
+        height: 22px;
+        line-height: 22px;
+        font-size: 11px;
+        flex-shrink: 0;
+    }
+    
+    /* Счетчик в мобильной версии - делаем маленьким и фиксированным */
+    .bookings-count {
+        display: inline-block;
+        width: 22px;
+        height: 22px;
+        line-height: 22px;
+        padding: 0;
+        text-align: center;
+        font-size: 11px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-left: 4px;
+    }
+    
+    /* Контейнер для даты и счетчика - фиксированная ширина */
+    .day-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 4px;
+    }
+}
     
     /* ========== МАЛЕНЬКИЕ ТЕЛЕФОНЫ (до 480px) ========== */
     @media (max-width: 480px) {
@@ -1161,6 +1210,7 @@ function renderCalendar(data) {
     
     let html = '';
     
+    // Пустые ячейки
     for (let i = 0; i < firstWeekday; i++) {
         html += `<div class="calendar-day" style="background: #fafafa; opacity: 0.5;"></div>`;
     }
@@ -1176,7 +1226,7 @@ function renderCalendar(data) {
             }
         }
         
-        // Сортируем записи по времени
+        // Сортируем записи
         let sortedBookings = [];
         if (day.bookings && day.bookings.length > 0) {
             sortedBookings = [...day.bookings].sort((a, b) => a.time.localeCompare(b.time));
@@ -1192,10 +1242,24 @@ function renderCalendar(data) {
             });
         }
         
-        // Карточки записей (только просмотр)
+        // Индикаторы для мобильных
+        let indicators = '';
+        if (isMobile) {
+            if (day.is_full_day_off) {
+                indicators += `<span class="indicator-dayoff">🚫</span>`;
+            } else if (day.off_hours && day.off_hours.length > 0) {
+                indicators += `<span class="indicator-hours-off">⏰</span>`;
+            }
+            
+            if (sortedBookings.length > 0 && !day.is_full_day_off) {
+                indicators += `<span class="indicator-booking">${sortedBookings.length}</span>`;
+            }
+        }
+        
+        // Карточки записей для десктопа
         let bookingsHtml = '';
-        if (sortedBookings.length > 0 && !day.is_full_day_off) {
-            const maxShow = isMobile ? 2 : 3;
+        if (!isMobile && sortedBookings.length > 0 && !day.is_full_day_off) {
+            const maxShow = 3;
             bookingsHtml = `<div class="bookings-list">`;
             
             sortedBookings.slice(0, maxShow).forEach(booking => {
@@ -1235,12 +1299,13 @@ function renderCalendar(data) {
         html += `
             <div class="calendar-day" style="${bgColor}" onclick="openDayModal('${day.date}', ${day.is_full_day_off})">
                 ${deleteBtn}
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <div class="day-header">
                     <span class="day-number">${day.day_num}</span>
                     ${bookingsCountBadge}
                 </div>
                 <div class="day-badges">${badges}</div>
                 ${bookingsHtml}
+                <div class="day-indicators">${indicators}</div>
             </div>
         `;
     });
