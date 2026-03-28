@@ -932,7 +932,7 @@
         .hours-off-badge { background: #ffaa44; color: white; }
     }
     
-    /* ========== МОБИЛЬНЫЕ (до 768px) ========== */
+ /* ========== МОБИЛЬНЫЕ (до 768px) ========== */
 @media (max-width: 768px) {
     .calendar-container {
         padding: 8px;
@@ -947,13 +947,11 @@
     .calendar-day {
         min-height: 65px;
         padding: 5px;
-        position: relative;
     }
     
     .day-number {
         font-size: 12px;
         padding: 2px 5px;
-        display: inline-block;
     }
     
     .weekday {
@@ -984,23 +982,22 @@
         gap: 4px;
     }
     
-    /* Фиксированный размер индикаторов, чтобы не ломали сетку */
+    /* Индикаторы */
     .indicator-booking,
     .indicator-dayoff,
     .indicator-hours-off {
-        width: 22px;
-        height: 22px;
-        line-height: 22px;
-        font-size: 11px;
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        font-size: 12px;
         flex-shrink: 0;
     }
     
-    /* Счетчик в мобильной версии - делаем маленьким и фиксированным */
+    /* Счетчик */
     .bookings-count {
-        display: inline-block;
-        width: 22px;
-        height: 22px;
-        line-height: 22px;
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
         padding: 0;
         text-align: center;
         font-size: 11px;
@@ -1009,7 +1006,7 @@
         margin-left: 4px;
     }
     
-    /* Контейнер для даты и счетчика - фиксированная ширина */
+    /* Шапка ячейки */
     .day-header {
         display: flex;
         justify-content: space-between;
@@ -1019,59 +1016,73 @@
     }
 }
     
-    /* ========== МАЛЕНЬКИЕ ТЕЛЕФОНЫ (до 480px) ========== */
-    @media (max-width: 480px) {
-        .calendar-grid {
-            gap: 3px;
-        }
-        
-        .calendar-day {
-            min-height: 55px;
-            padding: 4px;
-        }
-        
-        .day-number {
-            font-size: 12px;
-            padding: 1px 4px;
-        }
-        
-        .weekday {
-            padding: 4px 1px;
-            font-size: 9px;
-        }
-        
-        .month-title {
-            font-size: 16px;
-        }
-        
-        .calendar-nav button {
-            padding: 5px 8px;
-            font-size: 11px;
-        }
-        
-        .indicator-booking,
-        .indicator-dayoff,
-        .indicator-hours-off {
-            width: 22px;
-            height: 22px;
-            line-height: 22px;
-            font-size: 11px;
-        }
-
-        
-        .modal-content {
-            padding: 15px;
-        }
-        
-        .modal-content h3 {
-            font-size: 18px;
-        }
-        
-        .btn-primary, .btn-secondary {
-            padding: 8px 12px;
-            font-size: 13px;
-        }
+  /* ========== МАЛЕНЬКИЕ ТЕЛЕФОНЫ (до 480px) ========== */
+@media (max-width: 480px) {
+    .calendar-grid {
+        gap: 3px;
     }
+    
+    .calendar-day {
+        min-height: 55px;
+        padding: 4px;
+    }
+    
+    .day-number {
+        font-size: 12px;
+        padding: 1px 4px;
+    }
+    
+    .weekday {
+        padding: 4px 1px;
+        font-size: 9px;
+    }
+    
+    .month-title {
+        font-size: 16px;
+    }
+    
+    .calendar-nav button {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+    
+    /* Индикаторы */
+    .indicator-booking,
+    .indicator-dayoff,
+    .indicator-hours-off {
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+        font-size: 10px;
+    }
+    
+    /* Счетчик для маленьких телефонов */
+    .bookings-count {
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+        font-size: 10px;
+        padding: 0;
+    }
+    
+    /* Шапка ячейки */
+    .day-header {
+        margin-bottom: 3px;
+    }
+    
+    .modal-content {
+        padding: 15px;
+    }
+    
+    .modal-content h3 {
+        font-size: 18px;
+    }
+    
+    .btn-primary, .btn-secondary {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+}
 </style>
 {% endblock %}
 
@@ -1242,7 +1253,7 @@ function renderCalendar(data) {
             });
         }
         
-        // Индикаторы для мобильных
+        // Индикаторы для мобильных (включая счетчик)
         let indicators = '';
         if (isMobile) {
             if (day.is_full_day_off) {
@@ -1251,6 +1262,7 @@ function renderCalendar(data) {
                 indicators += `<span class="indicator-hours-off">⏰</span>`;
             }
             
+            // Показываем количество записей в индикаторе
             if (sortedBookings.length > 0 && !day.is_full_day_off) {
                 indicators += `<span class="indicator-booking">${sortedBookings.length}</span>`;
             }
@@ -1292,8 +1304,8 @@ function renderCalendar(data) {
             bookingsHtml += `</div>`;
         }
         
-        // Счетчик записей
-        const bookingsCountBadge = sortedBookings.length > 0 && !day.is_full_day_off ? 
+        // Счетчик записей ТОЛЬКО ДЛЯ ДЕСКТОПА
+        const bookingsCountBadge = (!isMobile && sortedBookings.length > 0 && !day.is_full_day_off) ? 
             `<span class="bookings-count" onclick="event.stopPropagation(); openDayDetailModal('${day.date}')">${sortedBookings.length}</span>` : '';
         
         html += `
